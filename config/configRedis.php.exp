@@ -1,0 +1,10 @@
+<?php
+
+$redisConfig = [
+    'scheme' => 'tcp',
+    'host' => 'host',
+    'port' => 6379,
+    'password' => 'psw',
+];
+
+define('REDIS_CONFIG',$redisConfig);
