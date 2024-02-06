@@ -1,6 +1,11 @@
 <?php
 include_once 'src/Service/Template.php';
+include_once 'src/Model/Utilisateur.php';
+include_once 'src/Repository/ContactRepository.php';
+
 $template = new Template();
+$repoContact = new ContactRepository();
+$contacts = $repoContact->getAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -48,42 +53,52 @@ $template = new Template();
         </tr>
         </thead>
         <tbody>
+        <?php
+        /* var  */
+        /** @var Utilisateur $contact */
+        foreach ($contacts as $contact){
+            if (is_object($contact) && get_class($contact) === "stdClass") {
+                $contact = Utilisateur::fromStdClass($contact);
+            }
 
+            $class = 'class="border px-4 py-2"';
+            $colonne1 = '<td ' . $class .' >'. $contact->getNom() . ' '. $contact->getPrenom() . '</td>';
+            $colonne2 = '<td ' . $class .' >'. $contact->getEmail() . '</td>';
+            $colonne3 = '<td ' . $class .' >'. $contact->getTelephone() . '</td>';
+
+
+            $hrefEdit = 'href="http://applicloud/utilisateur/edit/' . $contact->getId() . '"';
+            $hrefSupprimer = 'href="http://applicloud/utilisateur/delete/' . $contact->getId() . '"';
+
+            $svgEdit = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="blue"
+                            class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" 
+                            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" 
+                            />
+                            </svg>';
+            $svgSupprimer = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="red" 
+                                class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" 
+                                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" 
+                                />
+                                </svg>';
+
+            $colonne4 = '<td class="border px-4 py-2 flex" >
+                                <a '. $hrefEdit .' class="mr-2" >' . $svgEdit . '</a>
+                                <a '. $hrefSupprimer . ' >' . $svgSupprimer . '</a>
+                            <td>
+               ';
+
+            echo '
+                <tr>'.
+                $colonne1.
+                $colonne2.
+                $colonne3.
+                $colonne4.
+                '</tr>';
+        }
+        ?>
         </tbody>
     </table>
 
 </div>
-
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script>
-    // Appeler l'API pour obtenir tous les utilisateurs
-    $.ajax({
-        url: 'http://applicloud/utilisateurs',
-        method: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            var tableHtml = '';
-
-            $.each(data, function (index, utilisateur) {
-                tableHtml += '<tr>';
-                tableHtml += '<td class="border px-4 py-2">' + utilisateur.nom + ' ' + utilisateur.prenom + '</td>';
-                tableHtml += '<td class="border px-4 py-2">' + utilisateur.email + '</td>';
-                tableHtml += '<td class="border px-4 py-2">' + utilisateur.telephone + '</td>';
-                tableHtml += '<td class="border px-4 py-2 flex">';
-                tableHtml += '<a href="http://applicloud/utilisateur/edit/' + utilisateur.id + '" class="mr-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="blue" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg></a>';
-                tableHtml += '<a href="http://applicloud/utilisateur/delete/' + utilisateur.id + '"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="red" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg></a>';
-                tableHtml += '</td>';
-                tableHtml += '</tr>';
-            });
-
-            // Injecter le tableau dans l'élément avec l'ID "table-utilisateurs"
-            $('#table-utilisateurs tbody').html(tableHtml);
-        },
-        error: function () {
-            console.error('Erreur lors de l\'appel de l\'API.');
-        }
-    });
-</script>
-
 </body>
 </html>

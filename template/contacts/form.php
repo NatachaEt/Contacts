@@ -1,6 +1,6 @@
 <?php
 include_once 'src/Service/Template.php';
-/** @var Utilisateur $contact */
+
 global $pathForm,$path, $contact;
 $template = new Template();
 
@@ -75,7 +75,7 @@ if(strpos($path, '/utilisateur/edit/') === 0){
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
         <div class="mt-4">
-            <input type="submit" value="Ajouter utilisateur" class="bg-blue-500 text-white px-4 py-2 rounded">
+            <input type="submit" value="<?php echo ucfirst($option); ?> utilisateur" class="bg-blue-500 text-white px-4 py-2 rounded">
         </div>
     </form>
 

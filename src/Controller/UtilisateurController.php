@@ -1,13 +1,14 @@
 <?php
 include_once 'src/Model/Utilisateur.php';
 include_once 'src/Service/Security.php';
+include_once 'src/Repository/ContactRepository.php';
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 function getAllUtilisateurs() {
-    $utilisateur = new Utilisateur();
-    $resultat = $utilisateur->getAll();
+    $repoContact = new ContactRepository();
+    $resultat = $repoContact->getAll();
 
     header('Content-Type: application/json');
     if (isset($resultat['error'])) {
@@ -28,9 +29,11 @@ function addContact() {
     }
 
     $contact = new Utilisateur($_POST['nom'], $_POST['prenom'], $_POST['email'], $_POST['telephone']);
-    $error = $contact->add();
-    if(isset($error['error'])){
-        $erreurForm = $error['error'];
+    $repoContact = new ContactRepository();
+    $repoContact->add($contact);
+
+    if(!empty($contact->getErrors())){
+        $erreurForm = $contact->getErrors();
         formErreurSession($erreurForm);
         postSession($_POST);
         generateCrfTokenSession();
@@ -46,9 +49,8 @@ function addContact() {
 function deleteContact() {
     global $path;
     $id = extractIdFromUrl($path, 'delete');
-    $contact = new Utilisateur();
-    $contact->setId($id);
-    $error = $contact->delete();
+    $repoContact = new ContactRepository();
+    $error = $repoContact->delete($id);
     if(isset($error['error'])){
         messageErreurSession($error['error']);
         header('Location: http://applicloud/');
@@ -61,7 +63,6 @@ function deleteContact() {
 }
 
 function afficheEdit() {
-    /** @var Utilisateur $contact */
     global $path,$pathForm,$contact;
     $urlSegments = explode('/', $path);
 
@@ -72,14 +73,21 @@ function afficheEdit() {
     }
 
     $id = extractIdFromUrl($path, 'edit');
-    $contact = new Utilisateur();
-    $contact->setId($id);
-    $error = $contact->get();
-    if(isset($error['error'])){
-        messageErreurSession($error['error']);
+    $repoContact = new ContactRepository();
+    $contact = $repoContact->getById($id);
+    if(!is_object($contact) && isset($contact['error']) ){
+        messageErreurSession($contact['error']);
         header('Location: http://applicloud/');
         exit();
     }
+
+    if($contact->getId() == 0)
+    {
+        messageErreurSession('l\'utilisateur n\'existe pas');
+        header('Location: http://applicloud/');
+        exit();
+    }
+
     if(!empty(getPostSession())){
         $contact->setUtilisateur(getPostSession());
     }
@@ -94,8 +102,7 @@ function afficheEdit() {
 }
 
 function postEdit() {
-    /** @var Utilisateur $contact */
-    global $path,$pathForm,$contact;
+    global $path,$contact;
     $urlSegments = explode('/', $path);
     if (!isset($urlSegments[3])) {
         http_response_code(404);
@@ -111,19 +118,18 @@ function postEdit() {
         exit();
     }
 
-    $contact = new Utilisateur();
-    $contact->setId($id);
-    $error = $contact->get();
-    if(isset($error['error'])){
-        messageErreurSession($error['error']);
+    $repoContact = new ContactRepository();
+    $contact = $repoContact->getById($id);
+    if(!is_object($contact) && isset($contact['error'])){
+        messageErreurSession($contact['error']);
         header('Location: http://applicloud/');
         exit();
     }
 
     $contact->setUtilisateur($_POST);
-    $error = $contact->put();
-    if(isset($error['error'])){
-        $erreurForm = $error['error'];
+    $repoContact->put($contact);
+    if(!empty($contact->getErrors())){
+        $erreurForm = $contact->getErrors();
         formErreurSession($erreurForm);
         postSession($_POST);
         generateCrfTokenSession();

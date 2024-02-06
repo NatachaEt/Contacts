@@ -10,6 +10,7 @@ function route($method, $path)
 {
     $history = History::getInstance();
     $history->newPath($path);
+    $contact = new Utilisateur();
 
     if ($method === 'GET') {
         if(strpos($path, '/utilisateur/delete/') === 0) {

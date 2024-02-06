@@ -45,13 +45,9 @@ class Bdd
 
     public function miseEnCache($key,$data)
     {
-        try {
-            $this->redis->hMset($key, $data);
-            $this->redis->expire($key, 3 * 3600);
-            $this->redis->del("getAll_contacts");
-        }catch (Error $e){
-
-        }
+        $this->redis->hMset($key, $data);
+        $this->redis->expire($key, 3 * 3600);
+        $this->redis->del("getAll_contacts");
     }
 
 }
