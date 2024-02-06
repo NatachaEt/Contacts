@@ -6,14 +6,17 @@ include_once 'src/Model/Bdd.php';
 
 class Utilisateur
 {
-    private string $id = '';
+    private int $id = 0;
     private string $nom;
     private string $prenom;
     private string $email;
     private string $telephone;
     private array $errors = [];
+    private $db;
+    private $mysqli;
     private $redis;
     static string $namespaceUtilisateur = 'utilisateur';
+
     public function __construct(String $nom = '',String $prenom = '',String $email = '',String $telephone = '')
     {
         $this->nom = trim($nom);
@@ -21,8 +24,9 @@ class Utilisateur
         $this->email = trim($email);
         $this->telephone = trim($telephone);
 
-        $bd = new Bdd();
-        $this->redis = $bd->getRedis();
+        $this->db = new Bdd();
+        $this->mysqli = $this->db->getMysqli();
+        $this->redis = $this->db->getRedis();
     }
 
     public function setId(string $id) {
@@ -31,6 +35,7 @@ class Utilisateur
 
     public function setUtilisateur(array $data) {
         foreach ($data as $key => $value) {
+            if($key == 'id') $this->id = $value;
             if($key == 'nom') $this->nom = $value;
             if($key == 'prenom') $this->prenom = $value;
             if($key == 'email') $this->email = $value;
@@ -54,16 +59,35 @@ class Utilisateur
         return $this->telephone;
     }
 
+    public function getDataCache()
+    {
+        return [
+            'id' => $this->id,
+            'nom' => $this->nom,
+            'prenom' => $this->prenom,
+            'email' => $this->email,
+            'telephone' => $this->telephone,
+        ];
+    }
+
     public function getAll() {
         try {
-            $keyUtilisateurs = $this->redis->keys('user:*');
-            $donneesUtilisateurs = [];
+            $allUsersKey = "getAll_contacts";
+            $donneesContacts = $this->redis->get($allUsersKey);
+            if (empty($donneesContacts)) {
+                $query = "SELECT * FROM contacts";
+                $result = $this->mysqli->query($query);
+                $donneesContacts = [];
 
-            foreach ($keyUtilisateurs as $key) {
-                $donneesUtilisateur = $this->redis->hgetall($key);
-                $donneesUtilisateurs[$key] = $donneesUtilisateur;
+                while ($row = $result->fetch_assoc()) {
+                    $donneesContacts[] = $row;
+                }
+
+                $this->redis->set($allUsersKey, json_encode($donneesContacts));
+            } else {
+                $donneesContacts = json_decode($donneesContacts, true);
             }
-            return $donneesUtilisateurs;
+            return $donneesContacts;
         }catch (Exception $e) {
             return gestionErreur($e,self::$namespaceUtilisateur.'_getAll');
         }
@@ -75,15 +99,19 @@ class Utilisateur
             if(empty($this->id)){
                 return ['error' => 'L\'utilisateur n\'exsite pas'];
             }
-
             $userKey = "user:$this->id";
             $donneesUtilisateur = $this->redis->hgetall($userKey);
-            foreach ($donneesUtilisateur as $key => $value) {
-                if($key == 'nom') $this->nom = $value;
-                if($key == 'prenom') $this->prenom = $value;
-                if($key == 'email') $this->email = $value;
-                if($key == 'telephone') $this->telephone = $value;
+
+            if (!$donneesUtilisateur) {
+                $query = "SELECT * FROM contacts WHERE id = ?";
+                $stmt = $this->mysqli->prepare($query);
+                $stmt->bind_param("i", $this->id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $donneesUtilisateur = $result->fetch_assoc();
+                $this->db->miseEnCache($userKey,$donneesUtilisateur);
             }
+            $this->setUtilisateur($donneesUtilisateur);
             return ['OK'];
         }catch (Exception $e){
             return gestionErreur($e,self::$namespaceUtilisateur.'_getAll');
@@ -97,20 +125,17 @@ class Utilisateur
             if(count($this->errors)){
                 return ['error' => $this->errors];
             }
-            //TODO vérifier si l'utilisateur existe déjà
-            $userId = $this->redis->incr('next_user_id');
+
+            $query = "INSERT INTO contacts (nom, prenom, email, telephone) VALUES (?, ?, ?, ?)";
+            $stmt = $this->mysqli->prepare($query);
+            $stmt->bind_param("ssss", $this->nom, $this->prenom, $this->email, $this->telephone);
+            $stmt->execute();
+
+            $userId = $this->mysqli->insert_id;
             $this->id = $userId;
             $userKey = "user:$userId";
 
-            $userData = [
-                'id' => $userId,
-                'nom' => $this->nom,
-                'prenom' => $this->prenom,
-                'email' => $this->email,
-                'telephone' => $this->telephone,
-            ];
-
-            $this->redis->hMset($userKey, $userData);
+            $this->db->miseEnCache($userKey,$this->getDataCache());
             return ['OK'];
         }catch (Exception $e) {
             return gestionErreur($e,self::$namespaceUtilisateur.'_add');
@@ -125,6 +150,10 @@ class Utilisateur
             }
 
             $userKey = "user:$this->id";
+            $query = "DELETE FROM contacts WHERE id = ?";
+            $stmt = $this->mysqli->prepare($query);
+            $stmt->bind_param("i", $this->id);
+            $stmt->execute();
 
             $this->redis->del($userKey);
             return ['OK'];
@@ -141,17 +170,25 @@ class Utilisateur
                 return ['error' => $this->errors];
             }
 
-            $userId = "user:$this->id";
+            $query = "SELECT id FROM contacts WHERE id = ?";
+            $stmt = $this->mysqli->prepare($query);
+            $stmt->bind_param("i", $this->id);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-            $userData = [
-                'nom' => $this->nom,
-                'prenom' => $this->prenom,
-                'email' => $this->email,
-                'telephone' => $this->telephone,
-            ];
+            if ($result->num_rows > 0) {
+                $query = "UPDATE contacts SET nom = ?, prenom = ?, email = ?, telephone = ? WHERE id = ?";
+                $stmt = $this->mysqli->prepare($query);
+                $stmt->bind_param("ssssi", $this->nom, $this->prenom, $this->email, $this->telephone, $this->id);
+                $stmt->execute();
 
-            $this->redis->hMset($userId, $userData);
-            return ['OK'];
+                $userId = "user:$this->id";
+                $this->db->miseEnCache($userId,$this->getDataCache());
+                return ['OK'];
+            } else {
+                return ['error' => 'L\'utilisateur n\'existe pas dans la base de données.'];
+            }
+
         }catch (Exception $e){
             return gestionErreur($e,self::$namespaceUtilisateur.'_put');
         }
