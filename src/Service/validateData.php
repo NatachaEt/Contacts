@@ -1,5 +1,5 @@
 <?php
-function validateNomEtPrenom(String $nom): bool
+function validateNomEtPrenom(string $nom): bool
 {
     if (empty($nom)) {
         return false;
@@ -10,7 +10,7 @@ function validateNomEtPrenom(String $nom): bool
         return false;
     }
 
-    if (!preg_match('/^[A-Za-z0-9\- ]+$/', $nom)) {
+    if (!preg_match('/^[\p{L}0\- ]+$/u', $nom)) {
         return false;
     }
 

@@ -1,4 +1,11 @@
 <?php
+include_once 'config/config.php';
+
+if(CONFIG['env'] == 'dev')
+{
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+}
 
 class ContactRepository {
 
@@ -73,25 +80,31 @@ class ContactRepository {
         }
     }
 
-    public function add(Utilisateur $utilisateur) :void
+    public function add(Utilisateur $contact) :void
     {
         try{
-            $utilisateur->validate();
-            if(count($utilisateur->getErrors())){
+            $contact->validate();
+            if(!empty($contact->getErrors())){
                 return;
             }
 
+            $nom = $contact->getNom();
+            $prenom = $contact->getPrenom();
+            $email = $contact->getEmail();
+            $telephone = $contact->getTelephone();
+
             $query = "INSERT INTO contacts (nom, prenom, email, telephone) VALUES (?, ?, ?, ?)";
             $stmt = $this->mysqli->prepare($query);
-            $stmt->bind_param("ssss", $this->nom, $this->prenom, $this->email, $this->telephone);
-            $stmt->execute();
+            $stmt->bind_param("ssss", $nom, $prenom, $email, $telephone);
+            $retour = $stmt->execute();
 
             $userId = $this->mysqli->insert_id;
-            $utilisateur->setId($userId);
+            $contact->setId($userId);
             $userKey = "user:$userId";
 
-            $this->db->miseEnCache($userKey,$utilisateur->getDataCache());
+            $this->db->miseEnCache($userKey,$contact->getDataCache());
         }catch (Exception $e) {
+            var_dump($e->getMessage());
             gestionErreur($e,Utilisateur::$namespaceUtilisateur.'_add');
         }
     }
@@ -129,6 +142,7 @@ class ContactRepository {
                 $this->add($contact);
                 return;
             }
+
             $nom = $contact->getNom();
             $prenom = $contact->getPrenom();
             $email = $contact->getEmail();
