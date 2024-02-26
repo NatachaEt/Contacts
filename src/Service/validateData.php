@@ -31,5 +31,9 @@ function validatePhone($phoneNumber)
     return preg_match($pattern, $phoneNumber) === 1;
 }
 
+function validateDepartement($departement) {
+
+}
+
 
 

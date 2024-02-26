@@ -3,8 +3,6 @@ include_once 'src/Model/Utilisateur.php';
 include_once 'src/Service/Security.php';
 include_once 'src/Repository/ContactRepository.php';
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 function getAllUtilisateurs() {
     $repoContact = new ContactRepository();

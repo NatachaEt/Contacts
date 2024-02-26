@@ -13,6 +13,8 @@ class ContactRepository {
     private $mysqli;
     private $redis;
 
+    static string $namespace = 'utilisateur';
+
     public function __construct()
     {
         $this->db = new Bdd();
@@ -43,7 +45,7 @@ class ContactRepository {
 
             return $donneesContacts;
         }catch (Exception $e) {
-            return gestionErreur($e,Utilisateur::$namespaceUtilisateur.'_getAll');
+            return gestionErreur($e,self::$namespace.'_getAll');
         }
     }
 
@@ -76,7 +78,7 @@ class ContactRepository {
 
             return $contact;
         }catch (Exception $e){
-            return gestionErreur($e,Utilisateur::$namespaceUtilisateur.'_getAll');
+            return gestionErreur($e,self::$namespace.'_getAll');
         }
     }
 
@@ -105,7 +107,7 @@ class ContactRepository {
             $this->db->miseEnCache($userKey,$contact->getDataCache());
         }catch (Exception $e) {
             var_dump($e->getMessage());
-            gestionErreur($e,Utilisateur::$namespaceUtilisateur.'_add');
+            gestionErreur($e,self::$namespace.'_add');
         }
     }
 
@@ -125,7 +127,7 @@ class ContactRepository {
             $this->redis->del($userKey);
             return ['OK'];
         }catch (Exception $e){
-            return gestionErreur($e,Utilisateur::$namespaceUtilisateur.'_delete');
+            return gestionErreur($e,self::$namespace.'_delete');
         }
     }
 
@@ -159,7 +161,7 @@ class ContactRepository {
 
 
         }catch (Exception $e){
-            gestionErreur($e,Utilisateur::$namespaceUtilisateur.'_put');
+            gestionErreur($e,self::$namespace.'_put');
         }
     }
 }

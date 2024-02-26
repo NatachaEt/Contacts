@@ -3,6 +3,7 @@
 include_once 'src/Service/gestionErreur.php';
 include_once 'src/Service/validateData.php';
 include_once 'src/Model/Bdd.php';
+include_once 'src/Model/Adresse.php';
 
 class Utilisateur implements JsonSerializable
 {
@@ -11,8 +12,10 @@ class Utilisateur implements JsonSerializable
     private string $prenom;
     private string $email;
     private string $telephone;
+//    private Adresse $adresse;
     private array $errors = [];
-    static string $namespaceUtilisateur = 'utilisateur';
+
+    static string $namespace = 'utilisateur';
 
     public function __construct(String $nom = '',String $prenom = '',String $email = '',String $telephone = '')
     {
@@ -60,6 +63,8 @@ class Utilisateur implements JsonSerializable
             if($key == 'prenom') $this->prenom = $value;
             if($key == 'email') $this->email = $value;
             if($key == 'telephone') $this->telephone = $value;
+            //TODO :
+//            if($key == 'adresse_id') $this->adresse = "";
         }
     }
 

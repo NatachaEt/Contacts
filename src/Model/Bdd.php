@@ -25,7 +25,6 @@ class Bdd
         }catch (Exception $e){
             gestionErreur($e,self::$namespaceErreur);
         }
-
     }
 
     public function getMysqli(): mysqli
