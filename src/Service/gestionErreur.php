@@ -1,6 +1,6 @@
 <?php
 
-function gestionErreur(Exception $e, string $namespace, string $bdd = ''): array
+function gestionErreur($e, string $namespace, string $bdd = ''): array
 {
     if($bdd == 'redis') {
         return ['error' => 'Erreur redis dans '. $namespace . ' : ' . $e->getMessage()];
@@ -8,6 +8,10 @@ function gestionErreur(Exception $e, string $namespace, string $bdd = ''): array
     if($bdd == 'mySql') {
         return ['error' => 'Erreur mySql dans '. $namespace . ' : ' . $e->getMessage()];
     }
+    if($bdd == 'curl') {
+        return ['error' => 'Erreur dans '. $namespace . ' : ' . $e];
+    }
+
     if($namespace == Bdd::$namespaceErreur) {
         return ['error' => 'Erreur de connexion à Redis : ' . $e->getMessage()];
     }

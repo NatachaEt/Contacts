@@ -101,6 +101,7 @@ class ContactRepository {
             $retour = $stmt->execute();
 
             $userId = $this->mysqli->insert_id;
+
             $contact->setId($userId);
             $userKey = "user:$userId";
 

@@ -10,8 +10,6 @@ class Adresse
     private int $id = 0;
     private string $departement;
     private string $commune;
-    private string $numero;
-    private string $voie;
     private Utilisateur $contact;
     private ContactRepository $repoContact;
 
@@ -24,8 +22,17 @@ class Adresse
         $this->commune = $commune;
         $this->numero = $numero;
         $this->voie = $voie;
-        $this->contact = $contact;
+        if($contact == null){
+            $this->contact = new Utilisateur();
+        }else {
+            $this->contact = $contact;
+        }
         $this->repoContact = new ContactRepository();
+    }
+
+    public function setId(?int $id): void
+    {
+        $this->id = $id;
     }
 
     public function getId(): int
@@ -58,9 +65,36 @@ class Adresse
         return $this->contact;
     }
 
+    public function validate()
+    {
+        $this->errors = [];
+        if(!validateDepartement($this->departement))
+            $this->addErreurDepartement();
+        if(!validateCommune($this->commune))
+            $this->addErreurCommune();
+
+    }
+
+    private function addErreur($typeErreur, $messageErreur) :void
+    {
+        if (!isset($this->errors[$typeErreur])) {
+            $this->errors[$typeErreur] = $messageErreur;
+        }
+    }
+
+    private function addErreurDepartement() :void
+    {
+        $this->addErreur('DepartementInvalide', 'Le département sélectionnée n\'existe pas');
+    }
+
+    private function addErreurCommune() :void
+    {
+        $this->addErreur('CommuneInvalide', 'La commune sélectionnée n\'existe pas');
+    }
+
     public function toString(): string
     {
-        return $this->departement . ' ' . $this->commune . ' ' .$this->numero. ' ' . $this->voie;
+        return $this->departement . ' ' . $this->commune;
     }
 
     public function setAdresse(array $data) :void
@@ -75,19 +109,9 @@ class Adresse
         }
     }
 
-    public function setErrors(array $errors) :void
-    {
-        foreach ($errors as $key => $value) {
-            $this->errors[$key] = $value;
-        }
-    }
-
     public function getErrors(): array
     {
-        $result = $this->errors;
-        $this->errors = [];
-
-        return $result;
+        return $this->errors;
     }
 
     public function getDataCache(): array

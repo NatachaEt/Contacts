@@ -4,6 +4,7 @@ include_once 'src/Service/gestionErreur.php';
 include_once 'src/Service/validateData.php';
 include_once 'src/Model/Bdd.php';
 include_once 'src/Model/Adresse.php';
+include_once 'src/Repository/AdresseRepository.php';
 
 class Utilisateur implements JsonSerializable
 {
@@ -12,7 +13,8 @@ class Utilisateur implements JsonSerializable
     private string $prenom;
     private string $email;
     private string $telephone;
-//    private Adresse $adresse;
+    private Adresse $adresse;
+    private AdresseRepository $repoAdresse;
     private array $errors = [];
 
     static string $namespace = 'utilisateur';
@@ -23,6 +25,8 @@ class Utilisateur implements JsonSerializable
         $this->prenom = trim($prenom);
         $this->email = trim($email);
         $this->telephone = trim($telephone);
+        $this->adresse = new Adresse();
+        $this->repoAdresse = new AdresseRepository();
     }
 
     public function setId(?int $id) :void
@@ -55,6 +59,11 @@ class Utilisateur implements JsonSerializable
         $this->telephone = $telephone;
     }
 
+    public function setAdresse(?Adresse $adresse): void
+    {
+        $this->adresse = $adresse;
+    }
+
     public function setUtilisateur(array $data) :void
     {
         foreach ($data as $key => $value) {
@@ -63,8 +72,13 @@ class Utilisateur implements JsonSerializable
             if($key == 'prenom') $this->prenom = $value;
             if($key == 'email') $this->email = $value;
             if($key == 'telephone') $this->telephone = $value;
-            //TODO :
-//            if($key == 'adresse_id') $this->adresse = "";
+            if($key == 'adresse_id') {
+                if($value != null){
+                    $this->adresse = $this->repoAdresse->getById($value);
+                } else {
+                    $this->adresse = new Adresse();
+                }
+            }
         }
     }
 
@@ -101,6 +115,8 @@ class Utilisateur implements JsonSerializable
             'prenom' => $this->prenom,
             'email' => $this->email,
             'telephone' => $this->telephone,
+            'adresse' => $this->adresse->toString(),
+            'adresse_id' => $this->adresse->getId(),
         ];
     }
 

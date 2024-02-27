@@ -2,6 +2,7 @@
     "require": {
         "predis/predis": "^2.2",
         "ext-json": "*",
-      "ext-mysqli": "*"
+      "ext-mysqli": "*",
+      "ext-curl": "*"
     }
 }

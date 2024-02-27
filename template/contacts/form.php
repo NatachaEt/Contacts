@@ -72,6 +72,16 @@ if(strpos($path, '/utilisateur/edit/') === 0){
             <input type="tel" name="telephone" id="telephone" class="w-full border rounded p-2" value="<?php echo $contact->getTelephone();?>" >
         </div>
 
+        <div class="mb-4">
+            <label for="departement" class="block text-gray-700 text-sm font-bold mb-2">Département :</label>
+            <input type="text" name="departement" id="departement" class="w-full border rounded p-2" value="" >
+        </div>
+
+        <div class="mb-4">
+            <label for="commune" class="block text-gray-700 text-sm font-bold mb-2">Commune :</label>
+            <input type="text" name="commune" id="commune" class="w-full border rounded p-2" value="" >
+
+        </div>
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
         <div class="mt-4">
@@ -80,5 +90,45 @@ if(strpos($path, '/utilisateur/edit/') === 0){
     </form>
 
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function updateDepartementOptions() {
+        var departementValue = $('#departement').val();
+
+        $.ajax({
+            url: 'http://applicloud/departement?name='+departementValue,
+            method: 'GET',
+            dataType: 'json',
+            success: function() {
+                $('#departement').empty();
+
+                // Limiter le nombre maximal de valeurs affichées
+                var maxValues = 5; // Définissez le nombre maximal de valeurs à afficher
+                var departementCount = data.length;
+
+                // Si le nombre de communes dépasse le nombre maximal autorisé, limiter les valeurs affichées
+                if (departementCount > maxValues) {
+                    data = data.slice(0, maxValues);
+                }
+
+                // Parcourir les communes récupérées et les ajouter comme options dans le selecteur
+                $.each(data, function(index, departement) {
+                    $('#commune').append('<option value="' + departement.name + '">' + departement.name + '</option>');
+                });
+
+            },
+            error: function(xhr, status, error) {
+                console.error('Erreur lors de la récupération des communes :', error);
+            }
+        });
+    }
+
+    // Écouter les changements sur le champ de département
+    $(document).ready(function() {
+        $('#departement').change(updateDepartementOptions);
+        updateDepartementOptions();
+    });
+</script>
+
 </body>
 </html>

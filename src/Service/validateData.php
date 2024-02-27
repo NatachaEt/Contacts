@@ -1,4 +1,5 @@
 <?php
+include_once 'src/Service/APIGeoLoc.php';
 function validateNomEtPrenom(string $nom): bool
 {
     if (empty($nom)) {
@@ -32,8 +33,43 @@ function validatePhone($phoneNumber)
 }
 
 function validateDepartement($departement) {
+    $departement = strtolower(trim($departement));
+    $APIGeoLoc = APIGeoLoc::getInstance();
+    $reponse =$APIGeoLoc->getDepartementByNom($departement);
 
+    //Si problème avec l'api on ne bloque pas l'application.
+    if(isset($reponse['error'])) {
+        return true;
+    }
+
+    /** @var Departement $d */
+    foreach ($reponse as $d) {
+        if(strtolower($d->nom) == ($departement)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
+function validateCommune($commune) {
+    $departement = strtolower(trim($commune));
+    $APIGeoLoc = APIGeoLoc::getInstance();
+    $reponse =$APIGeoLoc->getCommuneByNom($commune);
+
+    //Si problème avec l'api on ne bloque pas l'application.
+    if(isset($reponse['error'])) {
+        return true;
+    }
+
+    /** @var Commune $c */
+    foreach ($reponse as $c) {
+        if(strtolower($c->nom) == ($commune)) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 

@@ -2,6 +2,7 @@
 include_once 'src/Controller/UtilisateurController.php';
 include_once 'src/Service/validateData.php';
 include_once 'src/Service/Security.php';
+include_once 'src/Route/api.php';
 
 $contact = new Utilisateur();
 $pathForm = '';
@@ -11,6 +12,12 @@ function route($method, $path)
     $history = History::getInstance();
     $history->newPath($path);
     $contact = new Utilisateur();
+
+    if (strpos($path, "api") !== false) {
+       echo routeAPI($method,$path);
+       return;
+    }
+
 
     if ($method === 'GET') {
         if(strpos($path, '/utilisateur/delete/') === 0) {

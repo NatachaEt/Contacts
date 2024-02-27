@@ -87,6 +87,30 @@ class AdresseRepository
     }
 
     public function add(Adresse $adresse) {
+        $adresse->validate();
+        if(!empty($adresse->getErrors())){
+            return;
+        }
+
+        $departement = $adresse->getDepartement();
+        $commune = $adresse->getCommune();
+        $contact_id = $adresse->getContact()->getId();
+
+        try{
+            $query = "INSERT INTO adresses (contact_id, departement, commune) VALUES (?, ?, ?)";
+            $stmt = $this->mysqli->prepare($query);
+            $stmt->bind_param("iss", $departement, $commune);
+            $retour = $stmt->execute();
+
+            $adresseId = $this->mysqli->insert_id;
+        } catch (Exception $e) {
+            return gestionErreur($e,self::$namespace,'mySql');
+        }
+
+        $adresse->setId($adresseId);
+        $adresseKey = "adresse:$adresseId";
+
+        $this->db->miseEnCache($adresseKey,$adresse->getDataCache());
 
     }
 
