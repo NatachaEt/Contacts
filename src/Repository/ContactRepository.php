@@ -98,7 +98,7 @@ class ContactRepository {
             $query = "INSERT INTO contacts (nom, prenom, email, telephone) VALUES (?, ?, ?, ?)";
             $stmt = $this->mysqli->prepare($query);
             $stmt->bind_param("ssss", $nom, $prenom, $email, $telephone);
-            $retour = $stmt->execute();
+            $stmt->execute();
 
             $userId = $this->mysqli->insert_id;
 
@@ -125,6 +125,7 @@ class ContactRepository {
             $stmt->bind_param("i", $id);
             $stmt->execute();
 
+            $this->redis->del('getAll_contacts');
             $this->redis->del($userKey);
             return ['OK'];
         }catch (Exception $e){
@@ -150,11 +151,12 @@ class ContactRepository {
             $prenom = $contact->getPrenom();
             $email = $contact->getEmail();
             $telephone = $contact->getTelephone();
+            $adresse = $contact->getAdresse()?->getId();
 
-            $query = "UPDATE contacts SET nom = ?, prenom = ?, email = ?, telephone = ? WHERE id = ?";
+            $query = "UPDATE contacts SET nom = ?, prenom = ?, email = ?, telephone = ?, adresse_id = ? WHERE id = ?";
             $stmt = $this->mysqli->prepare($query);
 
-            $stmt->bind_param("ssssi", $nom, $prenom, $email, $telephone, $id);
+            $stmt->bind_param("ssssii", $nom, $prenom, $email, $telephone,$adresse, $id);
             $stmt->execute();
 
             $userId = "user:$id";

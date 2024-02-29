@@ -35,16 +35,15 @@ function validatePhone($phoneNumber)
 function validateDepartement($departement) {
     $departement = strtolower(trim($departement));
     $APIGeoLoc = APIGeoLoc::getInstance();
-    $reponse =$APIGeoLoc->getDepartementByNom($departement);
+    $reponse = $APIGeoLoc->getDepartementByNom($departement);
 
     //Si problème avec l'api on ne bloque pas l'application.
     if(isset($reponse['error'])) {
         return true;
     }
 
-    /** @var Departement $d */
     foreach ($reponse as $d) {
-        if(strtolower($d->nom) == ($departement)) {
+        if(strtolower($d['nom']) == ($departement)) {
             return true;
         }
     }

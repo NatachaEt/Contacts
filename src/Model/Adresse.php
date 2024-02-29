@@ -4,35 +4,41 @@ include_once 'src/Service/gestionErreur.php';
 include_once 'src/Service/validateData.php';
 include_once 'src/Model/Bdd.php';
 include_once 'src/Model/Utilisateur.php';
-include_once 'src/Repository/ContactRepository.php';
 class Adresse
 {
     private int $id = 0;
     private string $departement;
     private string $commune;
-    private Utilisateur $contact;
-    private ContactRepository $repoContact;
+    private ?int $contact_id;
 
     static string $namespace = 'adresse';
 
     private array $errors = [];
 
-    public function __construct(string $departement = '',string $commune = '',string $numero = '',string $voie = '',Utilisateur $contact = null) {
+    public function __construct(string $departement = '',string $commune = '',string $numero = '',string $voie = '',int $contact = null) {
         $this->departement = $departement;
         $this->commune = $commune;
         $this->numero = $numero;
         $this->voie = $voie;
-        if($contact == null){
-            $this->contact = new Utilisateur();
-        }else {
-            $this->contact = $contact;
+        $this->contact_id = $contact;
+    }
+
+    public function set(array $data) :void
+    {
+        foreach ($data as $key => $value) {
+            if($key == 'id') $this->id = $value;
+            if($key == 'departement') $this->departement = $value;
         }
-        $this->repoContact = new ContactRepository();
     }
 
     public function setId(?int $id): void
     {
         $this->id = $id;
+    }
+
+    public function setContact(?int $id): void
+    {
+        $this->contact_id = $id;
     }
 
     public function getId(): int
@@ -60,19 +66,20 @@ class Adresse
         return $this->voie;
     }
 
-    public function getContact(): Utilisateur
+    public function getContact(): int
     {
-        return $this->contact;
+        return $this->contact_id;
     }
 
-    public function validate()
+    public function validate() :void
     {
         $this->errors = [];
-        if(!validateDepartement($this->departement))
+        if(!validateDepartement($this->departement) && !empty($this->departement))
             $this->addErreurDepartement();
-        if(!validateCommune($this->commune))
+        if(!validateCommune($this->commune) && !empty($this->commune))
             $this->addErreurCommune();
-
+        if($this->contact_id == null)
+            $this->addErreur('Contact id null', 'L\'utilisateur n\'existe pas' );
     }
 
     private function addErreur($typeErreur, $messageErreur) :void
@@ -102,10 +109,6 @@ class Adresse
         foreach ($data as $key => $value) {
             if($key == 'id') $this->id = $value;
             if($key == 'departement') $this->departement = $value;
-            if($key == 'commune') $this->commune = $value;
-            if($key == 'numero') $this->numero = $value;
-            if($key == 'voie') $this->voie = $value;
-            if($key == 'contact_id') $this->contact = $this->repoContact->getById($value);
         }
     }
 
@@ -122,7 +125,7 @@ class Adresse
             'commune' => $this->commune,
             'voie' => $this->voie,
             'numero' => $this->numero,
-            'contact_id' => $this->contact->getId(),
+            'contact_id' => $this->contact_id,
         ];
     }
 

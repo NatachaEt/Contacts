@@ -48,6 +48,7 @@ $contacts = $repoContact->getAll();
             <th class="px-4 py-2">Contact</th>
             <th class="px-4 py-2">Email</th>
             <th class="px-4 py-2">Téléphone</th>
+            <th class="px-4 py-2">Adresse</th>
             <th class="px-4 py-2"></th>
             <th class="px-4 py-2"></th>
         </tr>
@@ -65,6 +66,7 @@ $contacts = $repoContact->getAll();
             $colonne1 = '<td ' . $class .' >'. $contact->getNom() . ' '. $contact->getPrenom() . '</td>';
             $colonne2 = '<td ' . $class .' >'. $contact->getEmail() . '</td>';
             $colonne3 = '<td ' . $class .' >'. $contact->getTelephone() . '</td>';
+            $colonne4 = '<td ' . $class .' >'. $contact->getAdresse()->toString() . '</td>';
 
 
             $hrefEdit = 'href="http://applicloud/utilisateur/edit/' . $contact->getId() . '"';
@@ -81,7 +83,7 @@ $contacts = $repoContact->getAll();
                                 />
                                 </svg>';
 
-            $colonne4 = '<td class="border px-4 py-2 flex" >
+            $colonne5 = '<td class="border px-4 py-2 flex" >
                                 <a '. $hrefEdit .' class="mr-2" >' . $svgEdit . '</a>
                                 <a '. $hrefSupprimer . ' >' . $svgSupprimer . '</a>
                             <td>
@@ -93,6 +95,7 @@ $contacts = $repoContact->getAll();
                 $colonne2.
                 $colonne3.
                 $colonne4.
+                $colonne5.
                 '</tr>';
         }
         ?>

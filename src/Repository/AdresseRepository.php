@@ -58,7 +58,6 @@ class AdresseRepository
         }
 
         $adresseKey = "adresse:$id";
-
         try {
             $donneesAdresse = $this->redis->hgetall($adresseKey);
         }catch (Exception $e){
@@ -79,14 +78,14 @@ class AdresseRepository
 
             if($donneesAdresse == null) return $adresse;
         }
-
         $adresse->setAdresse($donneesAdresse);
         $this->db->miseEnCache($adresseKey,$adresse->getDataCache());
 
         return $adresse;
     }
 
-    public function add(Adresse $adresse) {
+    public function add(Adresse $adresse) :void
+    {
         $adresse->validate();
         if(!empty($adresse->getErrors())){
             return;
@@ -94,24 +93,58 @@ class AdresseRepository
 
         $departement = $adresse->getDepartement();
         $commune = $adresse->getCommune();
-        $contact_id = $adresse->getContact()->getId();
+        $contact_id = $adresse->getContact();
 
         try{
             $query = "INSERT INTO adresses (contact_id, departement, commune) VALUES (?, ?, ?)";
             $stmt = $this->mysqli->prepare($query);
-            $stmt->bind_param("iss", $departement, $commune);
+            $stmt->bind_param("iss",$contact_id, $departement, $commune);
             $retour = $stmt->execute();
 
             $adresseId = $this->mysqli->insert_id;
         } catch (Exception $e) {
-            return gestionErreur($e,self::$namespace,'mySql');
+            var_dump($e->getMessage());
+            gestionErreur($e,self::$namespace,'mySql');
+            die();
         }
 
         $adresse->setId($adresseId);
         $adresseKey = "adresse:$adresseId";
 
         $this->db->miseEnCache($adresseKey,$adresse->getDataCache());
+    }
 
+    public function put(Adresse $adresse) :void
+    {
+        $adresse->validate();
+        if(!empty($adresse->getErrors())){
+            return;
+        }
+
+        $id = $adresse->getId();
+        if(empty($id)) {
+            $this->add($adresse);
+            return;
+        }
+
+        $departement = $adresse->getDepartement();
+        $commune = $adresse->getCommune();
+        $contact_id = $adresse->getContact();
+
+        try{
+            $query = "UPDATE adresses SET contact_id = ?, departement = ?, commune = ? WHERE id = ?";
+            $stmt = $this->mysqli->prepare($query);
+            $stmt->bind_param("issi", $contact_id,$departement, $commune, $id);
+            $retour = $stmt->execute();
+
+        } catch (Exception $e) {
+            var_dump($e->getMessage());
+            gestionErreur($e,self::$namespace,'mySql');
+        }
+
+        $adresseKey = "adresse:$id";
+
+        $this->db->miseEnCache($adresseKey,$adresse->getDataCache());
     }
 
 }

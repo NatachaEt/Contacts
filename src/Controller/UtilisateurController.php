@@ -2,6 +2,7 @@
 include_once 'src/Model/Utilisateur.php';
 include_once 'src/Service/Security.php';
 include_once 'src/Repository/ContactRepository.php';
+include_once 'src/Repository/AdresseRepository.php';
 
 
 function getAllUtilisateurs() {
@@ -27,8 +28,18 @@ function addContact() {
     }
 
     $contact = new Utilisateur($_POST['nom'], $_POST['prenom'], $_POST['email'], $_POST['telephone']);
+    $adresse = new Adresse($_POST['departement']);
+
     $repoContact = new ContactRepository();
     $repoContact->add($contact);
+
+    $repoAdresse = new AdresseRepository();
+    $adresse->setContact($contact->getId());
+    $repoAdresse->add($adresse);
+
+    $contact->setAdresse($adresse);
+    $repoContact->put($contact);
+
 
     if(!empty($contact->getErrors())){
         $erreurForm = $contact->getErrors();
@@ -49,6 +60,7 @@ function deleteContact() {
     $id = extractIdFromUrl($path, 'delete');
     $repoContact = new ContactRepository();
     $error = $repoContact->delete($id);
+
     if(isset($error['error'])){
         messageErreurSession($error['error']);
         header('Location: http://applicloud/');
@@ -117,6 +129,8 @@ function postEdit() {
     }
 
     $repoContact = new ContactRepository();
+    $repoAdresse = new AdresseRepository();
+
     $contact = $repoContact->getById($id);
     if(!is_object($contact) && isset($contact['error'])){
         messageErreurSession($contact['error']);
@@ -125,10 +139,16 @@ function postEdit() {
     }
 
     $contact->setUtilisateur($_POST);
+    $adresse =  $contact->getAdresse();
+    $adresse->setContact($id);
+
+    $adresse->setAdresse($_POST);
+
+    $repoAdresse->put($adresse);
     $repoContact->put($contact);
-    if(!empty($contact->getErrors())){
-        $erreurForm = $contact->getErrors();
-        formErreurSession($erreurForm);
+    if(!empty($contact->getErrors()) || !empty($contact->getErrors())){
+        formErreurSession($adresse->getErrors());
+        formErreurSession($contact->getErrors());
         postSession($_POST);
         generateCrfTokenSession();
         header('Location: http://applicloud/utilisateur/edit/'.$id);

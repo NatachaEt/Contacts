@@ -1,4 +1,5 @@
 <?php
+include_once 'config/config.php';
 
 class APIGeoLoc
 {
@@ -6,10 +7,7 @@ class APIGeoLoc
     private string $endpoint = "https://geo.api.gouv.fr";
     static string $namespace = "APIGeoloc";
 
-    private function __construct()
-    {
-        $curl = curl_init();
-    }
+    private function __construct(){}
 
     public static function getInstance()
     {
@@ -19,9 +17,15 @@ class APIGeoLoc
         return self::$instance;
     }
 
+    public function getDepartement() : array
+    {
+        $url = $this->endpoint.'/departements';
+        return $this->getReponse($url);
+    }
+
     public function getDepartementByNom($name) : array
     {
-        $url = $this->endpoint.'/departements?nom='.$name.'fields=nom';
+        $url = $this->endpoint.'/departements?nom='.$name.'&fields=nom&fields=code';
         return $this->getReponse($url);
     }
 
@@ -35,6 +39,9 @@ class APIGeoLoc
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        if(CONFIG['env'] == 'dev'){
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        }
         $response = curl_exec($curl);
 
         $data = [];

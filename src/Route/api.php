@@ -1,19 +1,31 @@
 <?php
 
-function routeAPI($method,$url)
+function routeAPI($method,$path)
 {
-    $url_components = parse_url($url);
-    $path = $url_components['path'];
 
-    if(strpos($path, '/departement') === 0) {
+    if(strpos($path, '/departement') !== false) {
+        $APIGeoLoc = APIGeoLoc::getInstance();
         if ($method === 'GET') {
-            $APIGeoLoc = APIGeoLoc::getInstance();
-            parse_str($url_components['query'], $query_params);
-            echo "<pre>";
-            var_dump($query_params);
-            echo "</pre>";
+            $name = "";
+            if(isset($_GET['name'])){
+                $name = htmlspecialchars($_GET['name']);
+                $name = trim($name);
+                if(!preg_match("/^[a-zA-Z ]+$/", $name) & !empty($name)) {
+                    http_response_code(500);
+                    echo "Format de nom non valide.";
+                }
+            }
 
-            //return $APIGeoLoc->getDepartementByNom();
+            $reponse = "";
+
+            if(empty($name)){
+                $reponse = $APIGeoLoc->getDepartement();
+            } else {
+                $reponse = $APIGeoLoc->getDepartementByNom($name);
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode($reponse);
         }
     }
 

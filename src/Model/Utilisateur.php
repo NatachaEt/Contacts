@@ -13,7 +13,7 @@ class Utilisateur implements JsonSerializable
     private string $prenom;
     private string $email;
     private string $telephone;
-    private Adresse $adresse;
+    private Adresse|null $adresse;
     private AdresseRepository $repoAdresse;
     private array $errors = [];
 
@@ -64,6 +64,11 @@ class Utilisateur implements JsonSerializable
         $this->adresse = $adresse;
     }
 
+    public function setAdresseById(?int $adresse_id): void
+    {
+        $this->adresse = $this->repoAdresse->getById($adresse_id);
+    }
+
     public function setUtilisateur(array $data) :void
     {
         foreach ($data as $key => $value) {
@@ -107,6 +112,11 @@ class Utilisateur implements JsonSerializable
         return $this->telephone;
     }
 
+    public function getAdresse(): Adresse|null
+    {
+        return $this->adresse;
+    }
+
     public function getDataCache(): array
     {
         return [
@@ -115,7 +125,6 @@ class Utilisateur implements JsonSerializable
             'prenom' => $this->prenom,
             'email' => $this->email,
             'telephone' => $this->telephone,
-            'adresse' => $this->adresse->toString(),
             'adresse_id' => $this->adresse->getId(),
         ];
     }
@@ -149,6 +158,7 @@ class Utilisateur implements JsonSerializable
         $utilisateur->setPrenom($stdClass->prenom);
         $utilisateur->setEmail($stdClass->email);
         $utilisateur->setTelephone($stdClass->telephone);
+        $utilisateur->setAdresseById($stdClass->adresse_id);
 
         return $utilisateur;
     }

@@ -60,10 +60,13 @@ function getMessageErreurSession()
     return '';
 }
 
-function formErreurSession($formErreur)
+function formErreurSession($formErreur): void
 {
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
+    }
+    if(isset($_SESSION['formErreur'])){
+        $_SESSION['formErreur'] =  array_merge($_SESSION['formErreur'],$formErreur);
     }
 
     $_SESSION['formErreur'] = $formErreur;

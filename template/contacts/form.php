@@ -54,34 +54,40 @@ if(strpos($path, '/utilisateur/edit/') === 0){
 
         <div class="mb-4">
             <label for="nom" class="block text-gray-700 text-sm font-bold mb-2">Nom :</label>
-            <input type="text" name="nom" id="nom" class="w-full border rounded p-2" value="<?php echo $contact->getNom();?>" required>
+            <input type="text" name="nom" id="nom" class="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" role="combobox" aria-controls="options" aria-expanded="false" value="<?php echo $contact->getNom();?>" required>
         </div>
 
         <div class="mb-4">
             <label for="prenom" class="block text-gray-700 text-sm font-bold mb-2">Prénom :</label>
-            <input type="text" name="prenom" id="prenom" class="w-full border rounded p-2" value="<?php echo $contact->getPrenom();?>" required>
+            <input type="text" name="prenom" id="prenom" class="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" role="combobox" aria-controls="options" aria-expanded="false" value="<?php echo $contact->getPrenom();?>" required>
         </div>
 
         <div class="mb-4">
             <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email :</label>
-            <input type="email" name="email" id="email" class="w-full border rounded p-2" value="<?php echo $contact->getEmail();?>" >
+            <input type="email" name="email" id="email" class="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" role="combobox" aria-controls="options" aria-expanded="false" value="<?php echo $contact->getEmail();?>" >
         </div>
 
         <div class="mb-4">
             <label for="telephone" class="block text-gray-700 text-sm font-bold mb-2">Numéro de téléphone :</label>
-            <input type="tel" name="telephone" id="telephone" class="w-full border rounded p-2" value="<?php echo $contact->getTelephone();?>" >
+            <input type="tel" name="telephone" id="telephone" class="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" role="combobox" aria-controls="options" aria-expanded="false" value="<?php echo $contact->getTelephone();?>" >
         </div>
 
         <div class="mb-4">
             <label for="departement" class="block text-gray-700 text-sm font-bold mb-2">Département :</label>
-            <input type="text" name="departement" id="departement" class="w-full border rounded p-2" value="" >
+            <div id="departement-div" class="relative mt-2">
+                <input type="text" name="departement" id="departement" class="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" role="combobox" aria-controls="options" aria-expanded="false" value="<?php echo $contact->getAdresse()->getDepartement();?>" >
+
+                <ul id="departement-list" class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm hover:cursor-pointer hidden" role="listbox">
+                    <li class="departement-li relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 hover:text-white hover:bg-indigo-500 hidden" role="option" tabindex="-1">
+                        <div class="flex">
+                            <span class="name truncate">Exemple</span>
+                            <span class="code ml-2 truncate text-gray-500">Exemple</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
 
-        <div class="mb-4">
-            <label for="commune" class="block text-gray-700 text-sm font-bold mb-2">Commune :</label>
-            <input type="text" name="commune" id="commune" class="w-full border rounded p-2" value="" >
-
-        </div>
         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
         <div class="mt-4">
@@ -94,26 +100,38 @@ if(strpos($path, '/utilisateur/edit/') === 0){
 <script>
     function updateDepartementOptions() {
         var departementValue = $('#departement').val();
-
         $.ajax({
-            url: 'http://applicloud/departement?name='+departementValue,
+            url: 'http://applicloud/api/departement?name='+departementValue,
             method: 'GET',
             dataType: 'json',
-            success: function() {
-                $('#departement').empty();
+            success: function(data) {
+                var departementSuggestions = $('#departement-list');
+                departementSuggestions.children().slice(1).remove();
+                var li = $('.departement-li');
 
-                // Limiter le nombre maximal de valeurs affichées
-                var maxValues = 5; // Définissez le nombre maximal de valeurs à afficher
+                var maxValues = 5;
                 var departementCount = data.length;
 
-                // Si le nombre de communes dépasse le nombre maximal autorisé, limiter les valeurs affichées
                 if (departementCount > maxValues) {
                     data = data.slice(0, maxValues);
                 }
 
-                // Parcourir les communes récupérées et les ajouter comme options dans le selecteur
                 $.each(data, function(index, departement) {
-                    $('#commune').append('<option value="' + departement.name + '">' + departement.name + '</option>');
+                    var new_li = li.clone();
+                    new_li.removeClass('hidden');
+
+                    var nameElement = new_li.find('.name');
+                    nameElement.text(departement.nom);
+
+                    var codeElement = new_li.find('.code');
+                    codeElement.text(departement.code);
+
+                    departementSuggestions.append(new_li);
+
+                    new_li.on('click', function () {
+                        $('#departement').val(departement.nom);
+                        $('#departement-list').addClass('hidden');
+                    })
                 });
 
             },
@@ -123,9 +141,24 @@ if(strpos($path, '/utilisateur/edit/') === 0){
         });
     }
 
-    // Écouter les changements sur le champ de département
     $(document).ready(function() {
-        $('#departement').change(updateDepartementOptions);
+        var departement = $('#departement');
+        var departement_list = $('#departement-list');
+
+        departement.on('focus',function() {
+            departement_list.removeClass('hidden');
+        });
+
+        $(document).on('click', function(event) {
+            if (!$(event.target).closest('#departement-list').length && !$(event.target).is('#departement')) {
+                departement_list.addClass('hidden');
+            }
+        });
+
+        departement.on('keyup',function () {
+            updateDepartementOptions();
+        });
+
         updateDepartementOptions();
     });
 </script>
