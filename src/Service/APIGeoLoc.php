@@ -1,5 +1,6 @@
 <?php
 include_once 'config/config.php';
+include_once 'src/Service/gestionErreur.php';
 
 class APIGeoLoc
 {
@@ -14,6 +15,7 @@ class APIGeoLoc
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
@@ -25,13 +27,13 @@ class APIGeoLoc
 
     public function getDepartementByNom($name) : array
     {
-        $url = $this->endpoint.'/departements?nom='.$name.'&fields=nom&fields=code';
+        $url = $this->endpoint.'/departements?nom='.urlencode($name).'&fields=nom&fields=code';
         return $this->getReponse($url);
     }
 
     public function getCommuneByNom($name) : array
     {
-        $url = $this->endpoint.'/communes?nom='.$name.'&fields=nom&format=json&geometry=centre';
+        $url = $this->endpoint.'/communes?nom='.urlencode($name).'&fields=nom&format=json&geometry=centre';
         return $this->getReponse($url);
     }
 

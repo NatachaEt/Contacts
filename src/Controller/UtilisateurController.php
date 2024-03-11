@@ -1,5 +1,7 @@
 <?php
-include_once 'src/Model/Utilisateur.php';
+
+use App\Model\Utilisateur;
+
 include_once 'src/Service/Security.php';
 include_once 'src/Repository/ContactRepository.php';
 include_once 'src/Repository/AdresseRepository.php';

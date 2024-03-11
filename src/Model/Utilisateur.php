@@ -1,12 +1,12 @@
 <?php
 
-include_once 'src/Service/gestionErreur.php';
-include_once 'src/Service/validateData.php';
-include_once 'src/Model/Bdd.php';
-include_once 'src/Model/Adresse.php';
-include_once 'src/Repository/AdresseRepository.php';
+namespace App\Model;
 
-class Utilisateur implements JsonSerializable
+use JsonSerializable;
+use App\Repository\AdresseRepository;
+use stdClass;
+
+class Utilisateur extends Model implements JsonSerializable
 {
     private int $id = 0;
     private string $nom;

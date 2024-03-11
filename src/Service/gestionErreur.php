@@ -1,5 +1,8 @@
 <?php
 
+use App\Model\Bdd;
+use App\Model\Utilisateur;
+
 function gestionErreur($e, string $namespace, string $bdd = ''): array
 {
     if($bdd == 'redis') {

@@ -1,4 +1,11 @@
 <?php
+
+namespace App\Repository;
+
+use App\Model\Adresse;
+use App\Model\Bdd;
+use Exception;
+
 include_once 'config/config.php';
 
 if(CONFIG['env'] == 'dev')
@@ -49,7 +56,7 @@ class AdresseRepository
         }
     }
 
-    public function getById(int $id) :Adresse|array
+    public function getById(int $id) :Adresse|null
     {
         $adresse = new Adresse();
 
@@ -61,7 +68,7 @@ class AdresseRepository
         try {
             $donneesAdresse = $this->redis->hgetall($adresseKey);
         }catch (Exception $e){
-            return gestionErreur($e,self::$namespace, 'redis');
+            //TODO
         }
 
         if (empty($donneesAdresse)) {
@@ -73,7 +80,8 @@ class AdresseRepository
                 $result = $stmt->get_result();
                 $donneesAdresse = $result->fetch_assoc();
             }catch (Exception $e){
-                return gestionErreur($e,self::$namespace,'mySql');
+                gestionErreur($e,self::$namespace,'mySql');
+                return null;
             }
 
             if($donneesAdresse == null) return $adresse;

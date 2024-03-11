@@ -1,9 +1,11 @@
 <?php
 
-require_once 'vendor/autoload.php';
-include_once 'config/configRedis.php';
-include_once 'config/configMysql.php';
-include_once 'src/Service/gestionErreur.php';
+
+namespace App\Model;
+use Config\Mysql;
+use Config\Redis;
+use mysqli;
+
 
 class Bdd
 {
@@ -14,9 +16,9 @@ class Bdd
     public function __construct()
     {
         try {
-            $this->redis = new Predis\Client(REDIS_CONFIG);
-            $this->mysqli = new mysqli(MYSQL_CONFIG['hostname'], MYSQL_CONFIG['username'],
-                MYSQL_CONFIG['password'], MYSQL_CONFIG['bdd'],MYSQL_CONFIG['port']);
+            $this->redis = new \Predis\Client(Redis::getConfig());
+            $this->mysqli = new mysqli(Mysql::getHost(), Mysql::getUsername(),
+                Mysql::getPassword(), Mysql::getBdd(),Mysql::getPort());
 
             if ($this->mysqli->connect_error) {
                 die("Connexion échouée : " . $this->mysqli->connect_error);
@@ -44,9 +46,14 @@ class Bdd
 
     public function miseEnCache($key,$data)
     {
-        $this->redis->hMset($key, $data);
-        $this->redis->expire($key, 3 * 3600);
-        $this->redis->del("getAll_contacts");
+        try {
+            $this->redis->hMset($key, $data);
+            $this->redis->expire($key, 3 * 3600);
+            $this->redis->del("getAll_contacts");
+        }catch (\Exception $e){
+            //TODO
+        }
+
     }
 
 }

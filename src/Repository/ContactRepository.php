@@ -1,5 +1,13 @@
 <?php
+
+namespace App\Repository;
+
 include_once 'config/config.php';
+
+use App\Model\Utilisateur;
+use App\Model\Bdd;
+use Exception;
+
 
 if(CONFIG['env'] == 'dev')
 {
@@ -58,15 +66,27 @@ class ContactRepository {
                 return $contact;
             }
 
-            $userKey = "user:$id";
-            $donneesUtilisateur = $this->redis->hgetall($userKey);
+            try {
+                $userKey = "user:$id";
+                $donneesUtilisateur = $this->redis->hgetall($userKey);
+            }catch (Exception $e)
+            {
+                //TODO
+            }
+
             if (empty($donneesUtilisateur)) {
-                $query = "SELECT * FROM contacts WHERE id = ?";
-                $stmt = $this->mysqli->prepare($query);
-                $stmt->bind_param("i", $id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $donneesUtilisateur = $result->fetch_assoc();
+                try {
+                    $query = "SELECT * FROM contacts WHERE id = ?";
+                    $stmt = $this->mysqli->prepare($query);
+                    $stmt->bind_param("i", $id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $donneesUtilisateur = $result->fetch_assoc();
+                }catch (Exception $e){
+                    $donneesUtilisateur = null;
+                    //TODO;
+                }
+
                 if($donneesUtilisateur == null) return $contact;
 
                 $contact->setUtilisateur($donneesUtilisateur);
@@ -78,7 +98,8 @@ class ContactRepository {
 
             return $contact;
         }catch (Exception $e){
-            return gestionErreur($e,self::$namespace.'_getAll');
+            gestionErreur($e,self::$namespace.'_getAll');
+            return null;
         }
     }
 

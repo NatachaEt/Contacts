@@ -1,7 +1,9 @@
 <?php
+
+use App\Repository\ContactRepository;
+use App\Model\Utilisateur;
+
 include_once 'src/Service/Template.php';
-include_once 'src/Model/Utilisateur.php';
-include_once 'src/Repository/ContactRepository.php';
 
 $template = new Template();
 $repoContact = new ContactRepository();
