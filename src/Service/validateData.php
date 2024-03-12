@@ -72,4 +72,22 @@ function validateCommune($commune) {
     return false;
 }
 
+function validateCommuneInDepartement($commune,$departement) {
+    $commune = strtolower(trim($commune));
+    $departement = strtolower(trim($departement));
+    $APIGeoLoc = APIGeoLoc::getInstance();
+    $reponse = $APIGeoLoc->getCommuneInfoByNom($commune);
 
+    //Si problème avec l'api on ne bloque pas l'application.
+    if(empty($reponse) ||  isset($reponse['error'])) {
+        return true;
+    }
+
+    foreach ($reponse as $c) {
+        if(strtolower($c["nom"]) == $commune && strtolower($c["departement"]["nom"]) == $departement ) {
+            return true;
+        }
+    }
+
+    return false;
+}

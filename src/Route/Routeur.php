@@ -5,6 +5,7 @@ use App\Model\Utilisateur;
 include_once 'src/Service/validateData.php';
 include_once 'src/Service/Security.php';
 include_once 'src/Route/api.php';
+include_once 'src/Controller/UtilisateurController.php';
 
 $contact = new Utilisateur();
 $pathForm = '';

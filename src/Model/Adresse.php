@@ -80,6 +80,8 @@ class Adresse
             $this->addErreurDepartement();
         if(!empty($this->commune) && !validateCommune($this->commune))
             $this->addErreurCommune();
+        if(!empty($this->commune) && !empty($this->departement) && !validateCommuneInDepartement($this->commune,$this->departement))
+            $this->addErreurCommunNotInDepartement();
         if($this->contact_id == null || $repoContact->getById($this->contact_id) == null)
             $this->addErreur('ContactNotExist', 'L\'utilisateur n\'existe pas' );
     }
@@ -99,6 +101,11 @@ class Adresse
     private function addErreurCommune() :void
     {
         $this->addErreur('CommuneInvalide', 'La commune sélectionnée n\'existe pas');
+    }
+
+    private function  addErreurCommunNotInDepartement():void
+    {
+        $this->addErreur('CommuneNotInDepartement', 'La commune sélectionnée n\'appartient au departement '.$this->departement);
     }
 
     public function toString(): string

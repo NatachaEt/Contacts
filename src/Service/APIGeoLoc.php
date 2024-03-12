@@ -37,6 +37,12 @@ class APIGeoLoc
         return $this->getReponse($url);
     }
 
+    public function getCommuneInfoByNom($name) : array
+    {
+        $url = $this->endpoint.'/communes?nom='.urlencode($name).'&fields=nom,departement&format=json&geometry=centre';
+        return $this->getReponse($url);
+    }
+
     private function getReponse($url) {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);

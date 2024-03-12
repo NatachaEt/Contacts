@@ -1,10 +1,11 @@
 <?php
 
 use App\Model\Utilisateur;
+use App\Model\Adresse;
+use App\Repository\ContactRepository;
+use App\Repository\AdresseRepository;
 
 include_once 'src/Service/Security.php';
-include_once 'src/Repository/ContactRepository.php';
-include_once 'src/Repository/AdresseRepository.php';
 
 
 function getAllUtilisateurs() {
