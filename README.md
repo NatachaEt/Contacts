@@ -7,17 +7,21 @@
 - PHP 8.1
 
 ## Description
-projet bac a sable.
-Application de gestion de contact fait en php pur. 
-Le but était de voir le fonctionnement des frameworks de type MVC 
-et d'essayer de recréer un. Le projet de framework n'est pas terminé et 
-il reste pleins de points à améliorer. Le crud est totalement fonctionnel.
-Il est possible de :
-- Voir tous les contacts
-- Voir un contact
-- Ajouter un contact
-- Modifier un contact
-- Supprimer un contact
-- Ajouter un departement a un contact a l'aide de l'api geo.
+Projet bac à sable réalisé en PHP natif. Il s'agit d'une application de gestion de contacts, conçue dans le but d'expérimenter le fonctionnement des frameworks MVC en tentant d'en reproduire un de manière artisanale.
 
-Il n'y a pas de système d'authentification.
+Le développement du mini-framework est encore en cours et comporte plusieurs points à améliorer.
+En revanche, le CRUD est entièrement fonctionnel. L'application permet :
+
+d'afficher la liste des contacts,
+
+de consulter les détails d'un contact,
+
+d'ajouter un nouveau contact,
+
+de modifier un contact existant,
+
+de supprimer un contact,
+
+d'ajouter un département à un contact via l’API Geo.
+
+Note : il n’y a pas de système d’authentification intégré pour le moment.
